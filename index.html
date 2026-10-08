@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Vessel AI Passage Reader</title>
+    <link rel="manifest" href="manifest.json" />
+
+    <meta name="theme-color" content="#4f46e5" />
+
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <div class="logo-icon">📖</div>
+
+          <div>
+            <h1>Vessel AI Passage Reader</h1>
+            <p>Listen to anything</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button id="installBtn" class="install-btn" style="display: none">
+            📱 Install App
+          </button>
+
+          <button class="settings-btn" id="settingsBtn">⚙</button>
+        </div>
+      </header>
+
+      <!-- Main -->
+      <main>
+        <section class="hero">
+          <h2>Read. Listen. Learn.</h2>
+
+          <p>Turn your passages, notes and documents into natural AI speech.</p>
+        </section>
+
+        <!-- Reader Card -->
+        <section class="reader-card">
+          <div class="card-header">
+            <div>
+              <h3>Your Passage</h3>
+              <span id="wordCount">0 words</span>
+            </div>
+
+            <button id="clearBtn" class="clear-btn">Clear</button>
+          </div>
+
+          <textarea
+            id="passage"
+            placeholder="Paste or type your passage here..."
+          ></textarea>
+
+          <div class="reading-info">
+            <span id="readingTime"> 0 min read </span>
+
+            <span id="status"> Ready </span>
+          </div>
+
+          <!-- Controls -->
+          <div class="controls">
+            <div class="control-group">
+              <label for="speed"> Speed </label>
+
+              <select id="speed">
+                <option value="0.75">0.75x</option>
+
+                <option value="1" selected>1.0x</option>
+
+                <option value="1.25">1.25x</option>
+
+                <option value="1.5">1.5x</option>
+
+                <option value="1.75">1.75x</option>
+
+                <option value="2">2.0x</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="voice"> Voice </label>
+
+              <select id="voice">
+                <option value="JBFqnCBsd6RMkjVDRZzb">AI Voice</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Player -->
+          <div class="player">
+            <button id="stopBtn" class="secondary-btn">■</button>
+
+            <button id="readBtn" class="play-btn">▶ Read</button>
+
+            <button id="pauseBtn" class="secondary-btn">⏸</button>
+          </div>
+
+          <!-- Progress -->
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div id="progress" class="progress"></div>
+            </div>
+
+            <div class="progress-text">
+              <span id="currentTime"> 0:00 </span>
+
+              <span id="totalTime"> 0:00 </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features">
+          <div class="feature">
+            <div class="feature-icon">🔊</div>
+
+            <div>
+              <h3>Natural AI Voice</h3>
+
+              <p>Listen with clear, natural-sounding AI voices.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">📚</div>
+
+            <div>
+              <h3>Long Passages</h3>
+
+              <p>Read books, notes and long documents.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">⚡</div>
+
+            <div>
+              <h3>Easy to Use</h3>
+
+              <p>Paste your text and start listening.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer>
+        <p>AI Passage Reader © 2026</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
