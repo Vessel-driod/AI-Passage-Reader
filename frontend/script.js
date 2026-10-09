@@ -3,10 +3,30 @@ const passage = document.getElementById("passage");
 const readBtn = document.getElementById("readBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 const stopBtn = document.getElementById("stopBtn");
+const clearBtn = document.getElementById("clearBtn");
 
 const status = document.getElementById("status");
 
 let audio = null;
+
+// Clear the passage and stop any current audio
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    passage.value = "";
+
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio = null;
+    }
+
+    readBtn.disabled = false;
+    pauseBtn.textContent = "⏸ Pause";
+    status.textContent = "Passage cleared.";
+
+    passage.focus();
+  });
+}
 
 readBtn.addEventListener("click", async () => {
   const text = passage.value.trim();
