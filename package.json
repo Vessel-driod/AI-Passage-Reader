@@ -1,0 +1,9 @@
+{
+  "name": "ai-passage-reader",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Passage Reader powered by ElevenLabs",
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.0.0"
+  }
+}

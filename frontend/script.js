@@ -20,13 +20,14 @@ readBtn.addEventListener("click", async () => {
     status.textContent = "Generating AI voice...";
     readBtn.disabled = true;
 
-    const response = await fetch("http://localhost:5000/api/speak", {
+    const response = await fetch("/.netlify/functions/speak", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         text: text,
+        voiceId: document.getElementById("voice").value,
       }),
     });
 
