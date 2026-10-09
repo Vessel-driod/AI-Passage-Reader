@@ -1,3 +1,7 @@
+let browserChunks = [];
+let browserChunkIndex = 0;
+let browserSelectedSpeed = 1;
+let browserSession = 0;
 // ==========================================
 // VESSEL AI PASSAGE READER
 // ElevenLabs AI Voice + Free Browser Voice
@@ -331,49 +335,32 @@ function playBrowserVoice(text, selectedSpeed) {
   if (!("speechSynthesis" in window)) {
     status.textContent =
       "Browser speech is not supported. Try another browser.";
-
     readBtn.disabled = false;
     return;
   }
 
+  // Invalidate callbacks from any previous reading session.
+  const session = ++browserSession;
+
   window.speechSynthesis.cancel();
 
-  browserSpeech = new SpeechSynthesisUtterance(text);
+  // Split text into manageable chunks while preserving punctuation.
+  browserChunks = text.match(/[^.!?;:\n]+[.!?;:]?|\n+/g) || [text];
+  browserChunkIndex = 0;
+  browserSelectedSpeed = Number(selectedSpeed) || 1;
+  browserElapsed = 0;
 
-  // Set the browser's language and reading speed.
-  browserSpeech.lang = "en-US";
-  browserSpeech.rate = selectedSpeed;
-  browserSpeech.pitch = 1;
+  totalTime.textContent = formatTime(estimatedDuration);
+  readBtn.disabled = true;
+  pauseBtn.textContent = "⏸";
 
-  browserSpeech.onstart = () => {
-    status.textContent = "Reading with Free Browser Voice...";
-    readBtn.disabled = true;
+  speakNextBrowserChunk(session);
+}
 
-    startBrowserProgress();
-  };
+function speakNextBrowserChunk(session) {
+  if (session !== browserSession) return;
 
-  browserSpeech.onpause = () => {
-    if (browserStarted) {
-      browserElapsed += (Date.now() - browserStartTime) / 1000;
-
-      browserStarted = false;
-    }
-
-    stopBrowserProgress();
-    updateBrowserProgress();
-
-    pauseBtn.textContent = "▶ Resume";
-    status.textContent = "Paused.";
-  };
-
-  browserSpeech.onresume = () => {
-    pauseBtn.textContent = "⏸";
-    status.textContent = "Reading with Free Browser Voice...";
-
-    startBrowserProgress();
-  };
-
-  browserSpeech.onend = () => {
+  if (browserChunkIndex >= browserChunks.length) {
     stopBrowserProgress();
 
     browserStarted = false;
@@ -381,59 +368,89 @@ function playBrowserVoice(text, selectedSpeed) {
 
     progress.style.width = "100%";
     currentTime.textContent = formatTime(estimatedDuration);
-
     status.textContent = "Finished reading.";
 
     readBtn.disabled = false;
     pauseBtn.textContent = "⏸";
-
     browserSpeech = null;
+    return;
+  }
+
+  const chunk = browserChunks[browserChunkIndex].trim();
+
+  if (!chunk) {
+    browserChunkIndex++;
+    speakNextBrowserChunk(session);
+    return;
+  }
+
+  browserSpeech = new SpeechSynthesisUtterance(chunk);
+  browserSpeech.lang = "en-US";
+  browserSpeech.rate = browserSelectedSpeed;
+  browserSpeech.pitch = 1;
+
+  browserSpeech.onstart = () => {
+    if (session !== browserSession) return;
+
+    status.textContent = "Reading with Free Browser Voice...";
+    readBtn.disabled = true;
+
+    startBrowserProgress();
+  };
+
+  browserSpeech.onend = () => {
+    if (session !== browserSession) return;
+
+    browserChunkIndex++;
+    speakNextBrowserChunk(session);
   };
 
   browserSpeech.onerror = (event) => {
-    stopBrowserProgress();
+    if (session !== browserSession) return;
 
+    if (event.error === "canceled" || event.error === "interrupted") {
+      return;
+    }
+
+    stopBrowserProgress();
     browserStarted = false;
     readBtn.disabled = false;
-
-    // Ignore cancellation caused by stopping or changing speech.
-    if (event.error !== "canceled" && event.error !== "interrupted") {
-      status.textContent = "Browser voice could not read this passage.";
-    }
+    status.textContent = "Browser voice could not read this passage.";
   };
-
-  totalTime.textContent = formatTime(estimatedDuration);
 
   window.speechSynthesis.speak(browserSpeech);
 }
 
 // ==========================================
-// CHANGE READING SPEED
+// CHANGE READING SPEED WITHOUT RESTARTING
 // ==========================================
 
 speedSelect.addEventListener("change", () => {
   const selectedSpeed = Number(speedSelect.value) || 1;
 
-  // Update ElevenLabs audio speed immediately
+  // ElevenLabs audio: apply the new speed immediately.
   if (audio) {
     audio.playbackRate = selectedSpeed;
   }
 
-  // Browser speech may not apply rate changes mid-utterance.
-  // Restart browser speech at the new rate when necessary.
+  // Browser speech: continue from the next chunk.
   if (browserSpeech && window.speechSynthesis.speaking) {
-    const text = passage.value.trim();
+    browserSelectedSpeed = selectedSpeed;
 
-    if (text) {
-      window.speechSynthesis.cancel();
+    // Invalidate the current chunk's callbacks before cancelling it.
+    const session = ++browserSession;
 
-      browserSpeech = null;
-      browserStarted = false;
-      browserElapsed = 0;
+    window.speechSynthesis.cancel();
 
-      playBrowserVoice(text, selectedSpeed);
-    }
+    // Move forward so the current chunk is not read again.
+    browserChunkIndex++;
+
+    speakNextBrowserChunk(session);
+    return;
   }
+
+  // Also save the speed when reading has not started.
+  browserSelectedSpeed = selectedSpeed;
 
   status.textContent = `Reading speed: ${selectedSpeed}x`;
 });
