@@ -414,15 +414,25 @@ function playBrowserVoice(text, selectedSpeed) {
 speedSelect.addEventListener("change", () => {
   const selectedSpeed = Number(speedSelect.value) || 1;
 
+  // Update ElevenLabs audio speed immediately
   if (audio) {
     audio.playbackRate = selectedSpeed;
   }
 
-  if (browserSpeech) {
-    browserSpeech.rate = selectedSpeed;
+  // Browser speech may not apply rate changes mid-utterance.
+  // Restart browser speech at the new rate when necessary.
+  if (browserSpeech && window.speechSynthesis.speaking) {
+    const text = passage.value.trim();
 
-    // Some browsers apply changes during playback;
-    // others apply them to the next utterance.
+    if (text) {
+      window.speechSynthesis.cancel();
+
+      browserSpeech = null;
+      browserStarted = false;
+      browserElapsed = 0;
+
+      playBrowserVoice(text, selectedSpeed);
+    }
   }
 
   status.textContent = `Reading speed: ${selectedSpeed}x`;
